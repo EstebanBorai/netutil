@@ -6,6 +6,8 @@ use std::sync::mpsc::{Sender, channel};
 
 pub fn whiff(thread_count: u16, ip: IpAddr) {
   println!("Connecting to: {}", ip.to_string().green());
+  println!("Thread Count/Port Range: {}", thread_count.to_string().green());
+
   let (sender, receiver) = channel();
 
   for i in 0..thread_count {
@@ -45,7 +47,12 @@ fn scan(tx: Sender<u16>, start_from: u16, ip: IpAddr, thread_count: u16) {
         io::stdout().flush().unwrap();
         tx.send(current_port).unwrap();
       },
-      Err(_) => {}
+      Err(err) => {
+        let err_description: &str = &err.to_string();
+        
+        println!("Error connecting to: {}", &addr);
+        println!("{}", err_description.red());
+      }
     }
 
     if (u16::MAX - current_port) <= thread_count {

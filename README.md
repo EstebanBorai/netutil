@@ -4,17 +4,30 @@
   <small>📡 Port Sniffer Utility</small>
 </div>
 
+## Getting Started
+
+```bash
+git clone https://github.com/estebanborai/whiff.git
+
+cd whiff/
+
+cargo run -- -t 127.0.0.1 -r 2600
+```
+
+## Help Command Output (Clap)
+
 ```
 whiff 0.1.0
 Esteban Borai <estebanborai@gmail.com> (https://github.com/estebanborai)
 
 USAGE:
-    whiff --target <TARGET IP>
+    whiff [OPTIONS] --target <TARGET IP>
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -t, --target <TARGET IP>    Port Sniffer Utility
+    -r, --range <RANGE PORTS>    Range of ports to test from 0
+    -t, --target <TARGET IP>     Target host to connect
 ```

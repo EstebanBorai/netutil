@@ -1,3 +1,4 @@
+use colored::*;
 use clap::{App, Arg};
 use crate::whiff::{whiff as start_whiff};
 use std::str::FromStr;
@@ -9,19 +10,30 @@ pub struct Cli {
 
 impl Cli {
   pub fn start() {
-    let mut target_host: &str = "";
+    let target_host: &str;
+    let mut range_ports: u16 = 500;
 
     let app = App::new("whiff")
       .version("0.1.0")
       .author("Esteban Borai <estebanborai@gmail.com> (https://github.com/estebanborai)")
       .arg(
         Arg::with_name("target_host")
-          .help("Port Sniffer Utility")
+          .help("Target host to connect")
           .takes_value(true)
           .short("t")
           .long("target")
           .value_name("TARGET IP")
           .required(true)
+      )
+      .arg(
+        Arg::with_name("port_count")
+          .help("Range of ports to test from 0")
+          .default_value("500")
+          .takes_value(true)
+          .short("r")
+          .long("range")
+          .value_name("RANGE PORTS")
+          .required(false)
       );
 
       let matches = app.get_matches();
@@ -32,6 +44,12 @@ impl Cli {
         panic!("Missing \"target\" argument!");
       }
 
-      start_whiff(5, IpAddr::from_str(target_host).unwrap());
+      if let Some(value) = matches.value_of("range") {
+        range_ports = value.parse::<u16>().unwrap();
+      } else {
+        println!("{}","Range not defined, using default value \"500\"".yellow());
+      }
+
+      start_whiff(range_ports, IpAddr::from_str(target_host).unwrap());
   }
 }
