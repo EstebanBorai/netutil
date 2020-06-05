@@ -3,3 +3,18 @@
   <h1>whiff</h1>
   <small>📡 Port Sniffer Utility</small>
 </div>
+
+```
+whiff 0.1.0
+Esteban Borai <estebanborai@gmail.com> (https://github.com/estebanborai)
+
+USAGE:
+    whiff --target <TARGET IP>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -t, --target <TARGET IP>    Port Sniffer Utility
+```
