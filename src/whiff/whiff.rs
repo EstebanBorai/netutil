@@ -1,7 +1,7 @@
 use colored::*;
 use std::thread;
 use std::io::{self, Write};
-use std::net::{IpAddr, TcpStream};
+use std::net::{IpAddr, TcpStream, SocketAddr};
 use std::sync::mpsc::{Sender, channel};
 
 pub fn whiff(thread_count: u16, ip: IpAddr) {
@@ -40,7 +40,8 @@ fn scan(tx: Sender<u16>, start_from: u16, ip: IpAddr, thread_count: u16) {
   let mut current_port: u16 = start_from + 1;
 
   loop {
-    let addr = format!("{}:{}", ip.to_string().green(), current_port.to_string().blue());
+    let addr = SocketAddr::new(ip, current_port);
+
     match TcpStream::connect(&addr) {
       Ok(_) => {
         println!("Connected to: {}", &addr);

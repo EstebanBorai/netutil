@@ -141,3 +141,7 @@ bundle
 # Rust #
 ########
 target
+
+# Editor #
+##########
+.vscode/
