@@ -4,6 +4,13 @@
   <small>📡 Port Sniffer Utility</small>
 </div>
 
+<hr />
+<div align="center">
+  <img src="https://thumbs.gfycat.com/PartialFakeEnglishpointer-size_restricted.gif" alt="dog sniff" width="500" height="281" />
+</div>
+<p align="center">A nice friend sniffing your screen</p>
+<hr />
+
 ## Getting Started
 
 ```bash
@@ -14,7 +21,7 @@ cd whiff/
 cargo run -- -t 127.0.0.1 -r 2600
 ```
 
-## Help Command Output (Clap)
+## Help Command Output
 
 ```
 whiff 0.1.0

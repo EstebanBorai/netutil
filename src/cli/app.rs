@@ -1,55 +1,50 @@
-use colored::*;
+use crate::whiff::Whiff;
+use crate::cli::validator::validate_target;
 use clap::{App, Arg};
-use crate::whiff::{whiff as start_whiff};
-use std::str::FromStr;
-use std::net::{IpAddr};
+
+pub const TARGET: &str = "target";
+pub const RANGE: &str = "range";
+pub const LOG_LEVEL: &str = "log_level";
 
 pub struct Cli {
-  pub target_host: String
+  pub target_host: String,
 }
 
 impl Cli {
   pub fn start() {
-    let target_host: &str;
-    let mut range_ports: u16 = 500;
+    let target_arg = Arg::with_name(TARGET)
+      .index(1)
+      .help("Adress to connect to")
+      .default_value("0.0.0.0")
+      .takes_value(true)
+      .validator(validate_target)
+      .value_name("TARGET IP")
+      .required(true);
+
+    let range_arg = Arg::with_name(RANGE)
+      .help("Port range to test. If not specified, the range defaults to 500")
+      .default_value("1")
+      .takes_value(true)
+      .short("r")
+      .long(RANGE)
+      .value_name("RANGE PORTS")
+      .required(false);
+
+    let log_level_arg = Arg::with_name(LOG_LEVEL)
+    .help("Log level for the process. Defaults to error")
+    .default_value("error")
+    .takes_value(true)
+    .long(LOG_LEVEL)
+    .value_name("LOG LEVEL")
+    .required(false);
 
     let app = App::new("whiff")
       .version("0.1.0")
       .author("Esteban Borai <estebanborai@gmail.com> (https://github.com/estebanborai)")
-      .arg(
-        Arg::with_name("target_host")
-          .help("Target host to connect")
-          .takes_value(true)
-          .short("t")
-          .long("target")
-          .value_name("TARGET IP")
-          .required(true)
-      )
-      .arg(
-        Arg::with_name("port_count")
-          .help("Range of ports to test from 0")
-          .default_value("500")
-          .takes_value(true)
-          .short("r")
-          .long("range")
-          .value_name("RANGE PORTS")
-          .required(false)
-      );
+      .arg(target_arg)
+      .arg(range_arg)
+      .arg(log_level_arg);
 
-      let matches = app.get_matches();
-
-      if let Some(value) = matches.value_of("target_host") {
-        target_host = value;
-      } else {
-        panic!("Missing \"target\" argument!");
-      }
-
-      if let Some(value) = matches.value_of("range") {
-        range_ports = value.parse::<u16>().unwrap();
-      } else {
-        println!("{}","Range not defined, using default value \"500\"".yellow());
-      }
-
-      start_whiff(range_ports, IpAddr::from_str(target_host).unwrap());
+    Whiff::from(app.get_matches()).run();
   }
 }

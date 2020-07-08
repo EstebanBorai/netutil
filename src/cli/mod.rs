@@ -1,3 +1,5 @@
 mod app;
+mod validator;
 
-pub use app::Cli;
+pub use app::*;
+pub use validator::*;
