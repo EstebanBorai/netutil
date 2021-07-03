@@ -5,29 +5,33 @@ use std::mem::size_of;
 use crate::packet::raw::Raw;
 use crate::packet::Packet;
 
-const IPH_ICMP_PROTOCOL: u8 = 1;
-const IPH_IGMP_PROTOCOL: u8 = 2;
-const IPH_TCP_PROTOCOL: u8 = 6;
-const IPH_UDP_PROTOCOL: u8 = 17;
-const SOCKET_MESSAGE_BUFFER_SIZE: usize = 65536;
+/// Size of the buffer to store packet data received from
+/// the socket
+pub const SOCKET_MESSAGE_BUFFER_SIZE: usize = 65536;
 
+/// Packet counter for different protocols
 pub struct PacketCount {
     tcp: u64,
+    unknown: u64,
 }
 
+/// Packet Sniffer to listen to a socket and log packets received
+/// in such socket
 pub struct PacketSniffer {
     packet_count: PacketCount,
 }
 
 impl PacketSniffer {
+    /// Creates a new `PacketSniffer` instance with packet
+    /// counters set to `0`
     pub fn new() -> Self {
         PacketSniffer {
-            packet_count: PacketCount { tcp: 0 },
+            packet_count: PacketCount { tcp: 0, unknown: 0 },
         }
     }
 
+    /// Plugs into a socket and begins with the packet listening
     pub fn sniff(&mut self) {
-        println!("Started");
         let socket_addr_size = unsafe { malloc(size_of::<u32>()) as *mut u32 };
         let socket_addr = unsafe { malloc(size_of::<sockaddr>()) as *mut sockaddr };
         let packet_buffer = unsafe { malloc(SOCKET_MESSAGE_BUFFER_SIZE) };
@@ -71,15 +75,11 @@ impl PacketSniffer {
 
     fn handle_packet(&mut self, packet: Packet) {
         match packet {
-            Packet::Tcp(tcp) => {
+            Packet::Tcp(_tcp) => {
                 self.packet_count.tcp += 1;
-
-                println!("Received TCP Packet");
-                println!("{:#?}", tcp);
-                println!("Total TCP Packets: {}", self.packet_count.tcp);
             }
             Packet::Unknown(_) => {
-                println!("Received an unhandled packet");
+                self.packet_count.unknown += 1;
             }
         }
     }

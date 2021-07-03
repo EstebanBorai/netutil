@@ -6,6 +6,7 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 mod packet;
 mod sniff;
+mod utils;
 
 fn main() {
     let mut sniffer = sniff::PacketSniffer::new();
