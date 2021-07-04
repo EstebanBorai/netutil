@@ -75,7 +75,7 @@ impl PacketSniffer {
 
     fn handle_packet(&mut self, packet: Packet) {
         match packet {
-            Packet::Tcp(_tcp) => {
+            Packet::Tcp(tcp) => {
                 self.packet_count.tcp += 1;
             }
             Packet::Unknown(_) => {

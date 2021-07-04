@@ -19,10 +19,13 @@ impl Raw {
 
     pub fn instrospect(self) -> Packet {
         let ip_header = IpHeader::from(&self);
+        println!("{}", ip_header);
 
         match ip_header.protocol {
             IPH_TCP_PROTOCOL => {
                 let tcp_packet = Tcp::from(self);
+                println!("{}", tcp_packet);
+                println!("{}", tcp_packet.payload);
                 Packet::Tcp(tcp_packet)
             }
             _ => {

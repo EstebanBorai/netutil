@@ -1,7 +1,9 @@
+use std::fmt;
 use std::mem::transmute;
 
 use crate::utils::ntohs;
 
+use super::payload::Payload;
 use super::raw::Raw;
 
 #[derive(Debug)]
@@ -18,28 +20,68 @@ pub struct Tcp {
     pub window: u16,
     pub checksum: u16,
     pub urgent_ptr: u16,
+    pub payload: String,
+}
+
+impl fmt::Display for Tcp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            r#"
+TCP Packet
+------------------------------------
+Source Port: {source_port}
+Destination Port: {destination_port}
+Sequence Number: {sequence_number}
+Urgent Flag: {urgent_flag}
+Acknowledgement Flag: {acknowledgement_flag}
+Push Flag: {push_flag}
+Reset Flag: {reset_flag}
+Synchronise Flag: {synchronise_flag}
+Finish Flag: {finish_flag}
+Window: {window}
+Checksum: {checksum}
+Urgent Pointer: {urgent_ptr}
+------------------------------------
+"#,
+            source_port = self.source_port,
+            destination_port = self.destination_port,
+            sequence_number = self.sequence_number,
+            urgent_flag = self.urgent_flag,
+            acknowledgement_flag = self.acknowledgement_flag,
+            push_flag = self.push_flag,
+            reset_flag = self.reset_flag,
+            synchronise_flag = self.synchronise_flag,
+            finish_flag = self.finish_flag,
+            window = self.window,
+            checksum = self.checksum,
+            urgent_ptr = self.urgent_ptr,
+        )
+    }
 }
 
 impl From<Raw> for Tcp {
     fn from(raw: Raw) -> Self {
+        let payload = Payload::from(raw.buffer as *mut libc::c_char);
         let tcp_header = unsafe {
             let tcp_buffer = raw.buffer;
+            let tcp_buffer = transmute::<*mut libc::c_void, *mut crate::tcphdr>(tcp_buffer);
 
-            transmute::<*mut libc::c_void, *mut crate::tcphdr>(tcp_buffer)
+            (*tcp_buffer).__bindgen_anon_1.__bindgen_anon_2
         };
 
-        let source_port = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.source };
-        let destination_port = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.dest };
-        let sequence_number = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.seq };
-        let urgent_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.urg() };
-        let acknowledgement_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.ack() };
-        let push_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.psh() };
-        let reset_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.rst() };
-        let synchronise_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.syn() };
-        let finish_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.fin() };
-        let window = unsafe { ntohs((*tcp_header).__bindgen_anon_1.__bindgen_anon_2.window) };
-        let checksum = unsafe { ntohs((*tcp_header).__bindgen_anon_1.__bindgen_anon_2.check) };
-        let urgent_ptr = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.urg_ptr };
+        let source_port = tcp_header.source;
+        let destination_port = tcp_header.dest;
+        let sequence_number = tcp_header.seq;
+        let urgent_flag = tcp_header.urg();
+        let acknowledgement_flag = tcp_header.ack();
+        let push_flag = tcp_header.psh();
+        let reset_flag = tcp_header.rst();
+        let synchronise_flag = tcp_header.syn();
+        let finish_flag = tcp_header.fin();
+        let window = ntohs(tcp_header.window);
+        let checksum = ntohs(tcp_header.check);
+        let urgent_ptr = tcp_header.urg_ptr;
 
         Tcp {
             source_port,
@@ -54,6 +96,7 @@ impl From<Raw> for Tcp {
             window,
             checksum,
             urgent_ptr,
+            payload: payload.digest((tcp_header.doff() * 4) as usize)
         }
     }
 }
