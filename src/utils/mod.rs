@@ -14,3 +14,8 @@ pub fn parse_ipv4_address(decimal: u32) -> Ipv4Addr {
 
     Ipv4Addr::from(decimal)
 }
+
+/// Convert between host and network byte order
+pub fn ntohs(u: u16) -> u16 {
+    u16::from_be(u)
+}

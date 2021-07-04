@@ -1,5 +1,7 @@
 use std::mem::transmute;
 
+use crate::utils::ntohs;
+
 use super::raw::Raw;
 
 #[derive(Debug)]
@@ -35,16 +37,8 @@ impl From<Raw> for Tcp {
         let reset_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.rst() };
         let synchronise_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.syn() };
         let finish_flag = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.fin() };
-        let window = unsafe {
-            let window = (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.window;
-            // Convert between host and network byte order
-            crate::ntohs(window)
-        };
-        let checksum = unsafe {
-            let checksum = (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.check;
-            // Convert between host and network byte order
-            crate::ntohs(checksum)
-        };
+        let window = unsafe { ntohs((*tcp_header).__bindgen_anon_1.__bindgen_anon_2.window) };
+        let checksum = unsafe { ntohs((*tcp_header).__bindgen_anon_1.__bindgen_anon_2.check) };
         let urgent_ptr = unsafe { (*tcp_header).__bindgen_anon_1.__bindgen_anon_2.urg_ptr };
 
         Tcp {
