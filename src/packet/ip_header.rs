@@ -2,8 +2,8 @@ use std::fmt;
 use std::mem::transmute;
 use std::net::Ipv4Addr;
 
-use crate::utils::parse_ipv4_address;
 use crate::packet::payload::Payload;
+use crate::utils::parse_ipv4_address;
 
 use super::raw::Raw;
 

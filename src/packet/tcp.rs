@@ -96,7 +96,7 @@ impl From<Raw> for Tcp {
             window,
             checksum,
             urgent_ptr,
-            payload: payload.digest((tcp_header.doff() * 4) as usize)
+            payload: payload.digest((tcp_header.doff() * 4) as usize),
         }
     }
 }
