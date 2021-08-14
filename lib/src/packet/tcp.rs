@@ -1,10 +1,14 @@
 use std::fmt;
 use std::mem::transmute;
+use std::sync::{Arc, Mutex};
+
+use libc::c_void;
 
 use crate::utils::ntohs;
 
 use super::payload::Payload;
 use super::raw::Raw;
+use super::sniff::PacketBuffer;
 
 #[derive(Debug)]
 pub struct Tcp {
@@ -62,10 +66,10 @@ Urgent Pointer: {urgent_ptr}
 
 impl From<Raw> for Tcp {
     fn from(raw: Raw) -> Self {
-        let payload = Payload::from(raw.buffer as *mut libc::c_char);
+        let raw_buffer = raw.buffer.lock().unwrap().0;
+        let payload = Payload::from(raw_buffer as *mut libc::c_char);
         let tcp_header = unsafe {
-            let tcp_buffer = raw.buffer;
-            let tcp_buffer = transmute::<*mut libc::c_void, *mut crate::tcphdr>(tcp_buffer);
+            let tcp_buffer = transmute::<*mut libc::c_void, *mut crate::tcphdr>(raw_buffer);
 
             (*tcp_buffer).__bindgen_anon_1.__bindgen_anon_2
         };

@@ -60,7 +60,8 @@ Destination IP: {destination_ip}
 
 impl From<&Raw> for IpHeader {
     fn from(raw: &Raw) -> Self {
-        let ip_header = unsafe { transmute::<*mut libc::c_void, *mut crate::iphdr>(raw.buffer) };
+        let raw_buffer = raw.buffer.lock().unwrap().0;
+        let ip_header = unsafe { transmute::<*mut libc::c_void, *mut crate::iphdr>(raw_buffer) };
         let ip_header_len = unsafe { ((*ip_header).ihl() * 4) as usize };
         let protocol = unsafe { (*ip_header).protocol };
         let version = unsafe { (*ip_header).version() };
@@ -73,7 +74,7 @@ impl From<&Raw> for IpHeader {
         let checksum = unsafe { (*ip_header).check };
         let source_ip = unsafe { parse_ipv4_address((*ip_header).saddr) };
         let destination_ip = unsafe { parse_ipv4_address((*ip_header).daddr) };
-        let payload = Payload::from(raw.buffer as *mut i8);
+        let payload = Payload::from(raw_buffer as *mut i8);
 
         IpHeader {
             id,
